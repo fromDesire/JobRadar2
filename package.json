@@ -1,0 +1,23 @@
+{
+  "name": "jobradar2",
+  "version": "1.0.0",
+  "main": "index.js",
+    "scripts": {
+        "start": "node index.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fromDesire/JobRadar2.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/fromDesire/JobRadar2/issues"
+  },
+  "homepage": "https://github.com/fromDesire/JobRadar2#readme",
+  "description": "",
+  "dependencies": {
+    "node-telegram-bot-api": "^0.66.0"
+  }
+}
