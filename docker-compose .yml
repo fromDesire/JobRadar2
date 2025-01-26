@@ -1,0 +1,35 @@
+name: "bots"
+services:
+  telegram-bot:
+    build:
+      dockerfile: Dockerfile
+      context: https://github.com/fromDesire/JobRadar.git#main
+    image: telegram-bot
+    container_name: telegram-bot
+    restart: always
+    deploy:
+      resources:
+        limits:
+          memory: 200m
+    env_file:
+      - ./.env.bot-one
+    environment:
+      - TZ=Europe/Moscow
+      - NODE_ENV=production
+
+   telegram-bot-two: # РАЗНЫЕ
+     build:
+       dockerfile: Dockerfile
+       context: https://github.com/fromDesire/JobRadar2.git#main
+     image: telegram-bot-two # РАЗНЫЕ
+     container_name: telegram-bot-two # РАЗНЫЕ
+     restart: always
+     deploy:
+       resources:
+         limits:
+           memory: 200m
+     env_file:
+       - ./.env.bot-two # РАЗНЫЕ
+     environment:
+       - TZ=Europe/Moscow
+       - NODE_ENV=production
