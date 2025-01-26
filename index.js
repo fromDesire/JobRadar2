@@ -1,7 +1,7 @@
 const TelegramBot = require("node-telegram-bot-api");
 
-const BOT_TOKEN = "7916385981:AAFpy5VBqguCf62datasuduSqdkeNvFe77o"; // Укажите ваш токен
-const GROUP_CHAT_ID = "-4784456858"; // Укажите ID вашей группы
+const BOT_TOKEN = process.env.BOT_TOKEN; // Укажите ваш токен
+const GROUP_CHAT_ID = process.env.GROUP_CHAT_ID; // Укажите ID вашей группы
 
 const bot = new TelegramBot(BOT_TOKEN, { polling: true });
 
