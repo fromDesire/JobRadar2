@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const TelegramBot = require("node-telegram-bot-api");
 
 const BOT_TOKEN = process.env.BOT_TOKEN; // Укажите ваш токен
