@@ -2,10 +2,10 @@ require("dotenv").config();
 
 const TelegramBot = require("node-telegram-bot-api");
 
-const BOT_TOKEN = process.env.BOT_TOKEN; // Укажите ваш токен
-const GROUP_CHAT_ID = process.env.GROUP_CHAT_ID; // Укажите ID вашей группы
+const BOT_TOKEN_TWO = process.env.BOT_TOKEN_TWO; // Укажите ваш токен
+const GROUP_CHAT_ID_TWO = process.env.GROUP_CHAT_ID_TWO; // Укажите ID вашей группы
 
-const bot = new TelegramBot(BOT_TOKEN, { polling: true });
+const bot = new TelegramBot(BOT_TOKEN_TWO, { polling: true }); // Используем BOT_TOKEN_TWO для инициализации
 
 const userState = {};
 
@@ -225,7 +225,7 @@ bot.on("message", (msg) => {
     case "askPhone":
       state.data.phone = text;
       const userInfo = `Новая заявка:\nИмя: ${state.data.name}\nВозраст: ${state.data.age}\nГражданство: ${state.data.citizenship}\nВелосипед: ${state.data.bike}\nВес заказов: ${state.data.weight || "Не указано"}\nГород: ${state.data.city || "Не указан"}\nТелефон: ${state.data.phone}\nID пользователя: ${userMention}`;
-      bot.sendMessage(GROUP_CHAT_ID, userInfo);
+      bot.sendMessage(GROUP_CHAT_ID_TWO, userInfo); // Используем GROUP_CHAT_ID_TWO
       bot.sendMessage(
         chatId,
         "Спасибо! HR-менеджер свяжется с тобой в ближайшее время. ✅\n\nЗаявки обрабатываются ежедневно с 12:00 до 19:00. 🕐",
