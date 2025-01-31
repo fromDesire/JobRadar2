@@ -20,6 +20,18 @@ const mainMenu = {
   },
 };
 
+// Клавиатура для выбора гражданства
+const citizenshipKeyboard = {
+  reply_markup: {
+    keyboard: [
+      [{ text: "Гражданство РФ 🇷🇺" }],
+      [{ text: "Иностранный гражданин 🌍" }],
+    ],
+    resize_keyboard: true,
+    one_time_keyboard: true,
+  },
+};
+
 // Клавиатуры для выбора статуса и формы сотрудничества
 const statusKeyboard = {
   reply_markup: {
@@ -52,7 +64,13 @@ function getUserMention(msg) {
 // Функция для запроса гражданства
 async function askForCitizenship(chatId) {
   userState[chatId].step = 'WAITING_CITIZENSHIP';
-  await bot.sendMessage(chatId, 'Какое у тебя гражданство?', mainMenu);
+  await bot.sendMessage(chatId, 'Какое у тебя гражданство?', citizenshipKeyboard);
+}
+
+// Функция для запроса города
+async function askForCity(chatId) {
+  userState[chatId].step = 'WAITING_CITY';
+  await bot.sendMessage(chatId, 'В каком городе вы проживаете?', mainMenu);
 }
 
 // Обработчик команды /start
@@ -177,14 +195,17 @@ bot.on("message", (msg) => {
         state.step = "START";
       } else {
         state.data.age = age;
-
-        // Вызов функции для запроса гражданства
         askForCitizenship(chatId);
       }
       break;
 
     case "WAITING_CITIZENSHIP":
       state.data.citizenship = text;
+      askForCity(chatId);
+      break;
+
+    case "WAITING_CITY":
+      state.data.city = text;
       if (state.data.vacancy === "Курьер-доставщик") {
         bot.sendMessage(
           chatId,
@@ -329,6 +350,7 @@ bot.on("message", (msg) => {
 Имя: ${state.data.name || "Не указано"}
 Возраст: ${state.data.age || "Не указан"}
 Гражданство: ${state.data.citizenship || "Не указано"}
+Город: ${state.data.city || "Не указан"}
 Умение кататься на велосипеде: ${state.data.bike || "Не указано"}
 Способность поднимать тяжести: ${state.data.weight || "Не указано"}
 ИНН: ${state.data.inn || "Не указан"}
