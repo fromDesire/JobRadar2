@@ -262,13 +262,13 @@ bot.on("message", async (msg) => {
               "Готовы ли вы работать пешим курьером?",
               {
                 reply_markup: {
-                  keyboard: [[{ text: "Продолжим" }, { text: "Не думаю" }]],
+                  keyboard: [[{ text: "Готов" }, { text: "Не думаю" }]],
                   resize_keyboard: true,
                   one_time_keyboard: true,
                 },
               }
             );
-            state.step = "WAITING_WALK_COURIER";
+            state.step = "WAITING_INN";
           }
         } else {
           await bot.sendMessage(chatId, "Пожалуйста, выберите один из предложенных вариантов.", {
@@ -302,36 +302,6 @@ bot.on("message", async (msg) => {
         }
         break;
 
-      case "WAITING_WALK_COURIER":
-        if (text === "Продолжим" || text === "Не думаю") {
-          state.data.walkCourier = text;
-          if (text === "Не думаю") {
-            await bot.sendMessage(chatId, "Спасибо за интерес! Начните заново, если передумаете.", mainMenu);
-            state.step = "START";
-          } else {
-            await bot.sendMessage(
-              chatId,
-              "Сможете ли вы поднять тяжелый заказ (15-20 кг)?",
-              {
-                reply_markup: {
-                  keyboard: [[{ text: "Справлюсь" }, { text: "Не думаю" }]],
-                  resize_keyboard: true,
-                  one_time_keyboard: true,
-                },
-              }
-            );
-            state.step = "WAITING_WEIGHT";
-          }
-        } else {
-          await bot.sendMessage(chatId, "Пожалуйста, выберите один из предложенных вариантов.", {
-            reply_markup: {
-              keyboard: [[{ text: "Продолжим" }, { text: "Не думаю" }]],
-              resize_keyboard: true,
-              one_time_keyboard: true,
-            },
-          });
-        }
-        break;
 
       case "WAITING_INN":
         state.data.inn = text;
