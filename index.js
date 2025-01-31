@@ -283,13 +283,8 @@ bot.on("message", async (msg) => {
           text === "Бывший сотрудник (уволился > месяц)"
         ) {
           state.data.status = text;
-          if (state.data.vacancy === "Курьер-доставщик") {
-            await bot.sendMessage(chatId, "В какой трудовой форме удобно сотрудничать с компанией Самокат?", employmentKeyboard);
-            state.step = "WAITING_EMPLOYMENT";
-          } else {
-            await bot.sendMessage(chatId, "Есть ли у вас ИНН?", mainMenu);
-            state.step = "WAITING_INN";
-          }
+          await bot.sendMessage(chatId, "В какой трудовой форме удобно сотрудничать с компанией Самокат?", employmentKeyboard);
+          state.step = "WAITING_EMPLOYMENT";
         } else {
           await bot.sendMessage(chatId, "Пожалуйста, выберите один из предложенных вариантов.", statusKeyboard);
         }
