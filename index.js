@@ -49,6 +49,12 @@ function getUserMention(msg) {
   return msg.from.username ? `@${msg.from.username}` : `id${msg.from.id}`;
 }
 
+// Функция для запроса гражданства
+async function askForCitizenship(chatId) {
+  userState[chatId].step = 'WAITING_CITIZENSHIP';
+  await bot.sendMessage(chatId, 'Какое у тебя гражданство?', mainMenu);
+}
+
 // Обработчик команды /start
 bot.onText(/\/start|Вернуться в начало ↩️/, (msg) => {
   const chatId = msg.chat.id;
@@ -171,8 +177,9 @@ bot.on("message", (msg) => {
         state.step = "START";
       } else {
         state.data.age = age;
-        bot.sendMessage(chatId, "Какое у вас гражданство?", mainMenu);
-        state.step = "WAITING_CITIZENSHIP";
+
+        // Вызов функции для запроса гражданства
+        askForCitizenship(chatId);
       }
       break;
 
