@@ -105,7 +105,6 @@ bot.on("message", async (msg) => {
     switch (state.step) {
       case "START":
         if (text === "Курьер-доставщик 🚴‍♂️") {
-          // Путь курьера
           await bot.sendMessage(
             chatId,
             "Вы выбрали вакансию *Курьер-доставщик*.\n\n" +
@@ -133,7 +132,6 @@ bot.on("message", async (msg) => {
           );
           state.step = "CONSENT_COURIER";
         } else if (text === "Сборщик заказов 🛒") {
-          // Путь сборщика заказов
           await bot.sendMessage(
             chatId,
             "Вы выбрали вакансию *Сборщик заказов*.\n\n" +
@@ -212,64 +210,43 @@ bot.on("message", async (msg) => {
       case "WAITING_CITIZENSHIP":
         if (text === "Гражданство РФ 🇷🇺" || text === "Иностранный гражданин 🌍") {
           state.data.citizenship = text;
-          await bot.sendMessage(chatId, "В каком городе вы проживаете?", mainMenu);
-          state.step = "WAITING_CITY";
+          if (state.data.vacancy === "Курьер-доставщик") {
+            await bot.sendMessage(
+              chatId,
+              "Умеете ли вы кататься на велосипеде?",
+              {
+                reply_markup: {
+                  keyboard: [[{ text: "Да" }, { text: "Нет" }]],
+                  resize_keyboard: true,
+                  one_time_keyboard: true,
+                },
+              }
+            );
+            state.step = "WAITING_BIKE";
+          } else {
+            await bot.sendMessage(chatId, "С каким статусом вы обращаетесь?", statusKeyboard);
+            state.step = "WAITING_STATUS";
+          }
         } else {
           await bot.sendMessage(chatId, "Пожалуйста, выберите один из предложенных вариантов.", citizenshipKeyboard);
-        }
-        break;
-
-      case "WAITING_CITY":
-        state.data.city = text;
-        if (state.data.vacancy === "Курьер-доставщик") {
-          await bot.sendMessage(
-            chatId,
-            "Умеете ли вы кататься на велосипеде?",
-            {
-              reply_markup: {
-                keyboard: [[{ text: "Да" }, { text: "Нет" }]],
-                resize_keyboard: true,
-                one_time_keyboard: true,
-              },
-            }
-          );
-          state.step = "WAITING_BIKE";
-        } else {
-          await bot.sendMessage(chatId, "Есть ли у вас ИНН?", mainMenu);
-          state.step = "WAITING_INN";
         }
         break;
 
       case "WAITING_BIKE":
         if (text === "Да" || text === "Нет") {
           state.data.bike = text;
-          if (text === "Да") {
-            await bot.sendMessage(
-              chatId,
-              "Сможете ли вы поднять тяжелый заказ (15-20 кг)?",
-              {
-                reply_markup: {
-                  keyboard: [[{ text: "Справлюсь" }, { text: "Не думаю" }]],
-                  resize_keyboard: true,
-                  one_time_keyboard: true,
-                },
-              }
-            );
-            state.step = "WAITING_WEIGHT";
-          } else {
-            await bot.sendMessage(
-              chatId,
-              "Готовы ли вы работать пешим курьером?",
-              {
-                reply_markup: {
-                  keyboard: [[{ text: "Готов" }, { text: "Не думаю" }]],
-                  resize_keyboard: true,
-                  one_time_keyboard: true,
-                },
-              }
-            );
-            state.step = "WAITING_INN";
-          }
+          await bot.sendMessage(
+            chatId,
+            "Готовы ли вы работать пешим курьером?",
+            {
+              reply_markup: {
+                keyboard: [[{ text: "Продолжим" }, { text: "Не думаю" }]],
+                resize_keyboard: true,
+                one_time_keyboard: true,
+              },
+            }
+          );
+          state.step = "WAITING_WALK_COURIER";
         } else {
           await bot.sendMessage(chatId, "Пожалуйста, выберите один из предложенных вариантов.", {
             reply_markup: {
@@ -281,20 +258,17 @@ bot.on("message", async (msg) => {
         }
         break;
 
-      case "WAITING_WEIGHT":
-        if (text === "Справлюсь" || text === "Не думаю") {
-          state.data.weight = text;
-          if (text === "Не думаю") {
-            await bot.sendMessage(chatId, "Такие заказы редки. Давайте вернемся к началу.", mainMenu);
-            state.step = "START";
-          } else {
-            await bot.sendMessage(chatId, "Есть ли у вас ИНН?", mainMenu);
-            state.step = "WAITING_INN";
-          }
+      case "WAITING_WALK_COURIER":
+        if (text === "Продолжим") {
+          await bot.sendMessage(chatId, "С каким статусом вы обращаетесь?", statusKeyboard);
+          state.step = "WAITING_STATUS";
+        } else if (text === "Не думаю") {
+          await bot.sendMessage(chatId, "Спасибо за интерес! Если передумаешь, всегда можешь вернуться.", mainMenu);
+          state.step = "START";
         } else {
           await bot.sendMessage(chatId, "Пожалуйста, выберите один из предложенных вариантов.", {
             reply_markup: {
-              keyboard: [[{ text: "Справлюсь" }, { text: "Не думаю" }]],
+              keyboard: [[{ text: "Продолжим" }, { text: "Не думаю" }]],
               resize_keyboard: true,
               one_time_keyboard: true,
             },
@@ -302,22 +276,20 @@ bot.on("message", async (msg) => {
         }
         break;
 
-
-      case "WAITING_INN":
-        state.data.inn = text;
-        await bot.sendMessage(chatId, "С каким статусом вы обращаетесь?", statusKeyboard);
-        state.step = "WAITING_STATUS";
-        break;
-
       case "WAITING_STATUS":
         if (
           text === "Новый кандидат" ||
-          text === "Бывший сотрудник (уволился меньше месяца)" ||
-          text === "Бывший сотрудник (уволился больше месяца)"
+          text === "Бывший сотрудник (уволился < месяц)" ||
+          text === "Бывший сотрудник (уволился > месяц)"
         ) {
           state.data.status = text;
-          await bot.sendMessage(chatId, "В какой трудовой форме удобно сотрудничать с компанией Самокат?", employmentKeyboard);
-          state.step = "WAITING_EMPLOYMENT";
+          if (state.data.vacancy === "Курьер-доставщик") {
+            await bot.sendMessage(chatId, "В какой трудовой форме удобно сотрудничать с компанией Самокат?", employmentKeyboard);
+            state.step = "WAITING_EMPLOYMENT";
+          } else {
+            await bot.sendMessage(chatId, "Есть ли у вас ИНН?", mainMenu);
+            state.step = "WAITING_INN";
+          }
         } else {
           await bot.sendMessage(chatId, "Пожалуйста, выберите один из предложенных вариантов.", statusKeyboard);
         }
@@ -326,12 +298,18 @@ bot.on("message", async (msg) => {
       case "WAITING_EMPLOYMENT":
         if (text === "Самозанятость" || text === "ГПХ") {
           state.data.employment = text;
-          await bot.sendMessage(chatId, "Отлично! Думаю, ты подходишь! 🔥\n\n" +
-            "Теперь оставь свой номер телефона, чтобы HR-менеджер мог связаться с тобой. 📞", mainMenu);
-          state.step = "WAITING_PHONE";
+          await bot.sendMessage(chatId, "Есть ли у вас ИНН?", mainMenu);
+          state.step = "WAITING_INN";
         } else {
           await bot.sendMessage(chatId, "Пожалуйста, выберите один из предложенных вариантов.", employmentKeyboard);
         }
+        break;
+
+      case "WAITING_INN":
+        state.data.inn = text;
+        await bot.sendMessage(chatId, "Отлично! Думаю, ты подходишь! 🔥\n\n" +
+          "Теперь оставь свой номер телефона, чтобы HR-менеджер мог связаться с тобой. 📞", mainMenu);
+        state.step = "WAITING_PHONE";
         break;
 
       case "WAITING_PHONE":
@@ -345,12 +323,10 @@ bot.on("message", async (msg) => {
 Имя: ${state.data.name || "Не указано"}
 Возраст: ${state.data.age || "Не указан"}
 Гражданство: ${state.data.citizenship || "Не указано"}
-Город: ${state.data.city || "Не указан"}
 Умение кататься на велосипеде: ${state.data.bike || "Не указано"}
-Способность поднимать тяжести: ${state.data.weight || "Не указано"}
-ИНН: ${state.data.inn || "Не указан"}
 Статус: ${state.data.status || "Не указан"}
 Форма сотрудничества: ${state.data.employment || "Не указана"}
+ИНН: ${state.data.inn || "Не указан"}
 Телефон: ${state.data.phone || "Не указан"}
 ID пользователя: ${getUserMention(msg)}
         `;
