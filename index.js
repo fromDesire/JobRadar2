@@ -37,8 +37,8 @@ const statusKeyboard = {
   reply_markup: {
     keyboard: [
       [{ text: "Новый кандидат" }],
-      [{ text: "Бывший сотрудник (уволился меньше месяца)" }],
-      [{ text: "Бывший сотрудник (уволился больше месяца)" }],
+      [{ text: "Бывший сотрудник (уволился < месяц)" }],
+      [{ text: "Бывший сотрудник (уволился > месяц)" }],
     ],
     resize_keyboard: true,
     one_time_keyboard: true,
@@ -210,25 +210,31 @@ bot.on("message", async (msg) => {
       case "WAITING_CITIZENSHIP":
         if (text === "Гражданство РФ 🇷🇺" || text === "Иностранный гражданин 🌍") {
           state.data.citizenship = text;
-          if (state.data.vacancy === "Курьер-доставщик") {
-            await bot.sendMessage(
-              chatId,
-              "Умеете ли вы кататься на велосипеде?",
-              {
-                reply_markup: {
-                  keyboard: [[{ text: "Да" }, { text: "Нет" }]],
-                  resize_keyboard: true,
-                  one_time_keyboard: true,
-                },
-              }
-            );
-            state.step = "WAITING_BIKE";
-          } else {
-            await bot.sendMessage(chatId, "С каким статусом вы обращаетесь?", statusKeyboard);
-            state.step = "WAITING_STATUS";
-          }
+          await bot.sendMessage(chatId, "В каком городе вы проживаете?", mainMenu);
+          state.step = "WAITING_CITY";
         } else {
           await bot.sendMessage(chatId, "Пожалуйста, выберите один из предложенных вариантов.", citizenshipKeyboard);
+        }
+        break;
+
+      case "WAITING_CITY":
+        state.data.city = text;
+        if (state.data.vacancy === "Курьер-доставщик") {
+          await bot.sendMessage(
+            chatId,
+            "Умеете ли вы кататься на велосипеде?",
+            {
+              reply_markup: {
+                keyboard: [[{ text: "Да" }, { text: "Нет" }]],
+                resize_keyboard: true,
+                one_time_keyboard: true,
+              },
+            }
+          );
+          state.step = "WAITING_BIKE";
+        } else {
+          await bot.sendMessage(chatId, "С каким статусом вы обращаетесь?", statusKeyboard);
+          state.step = "WAITING_STATUS";
         }
         break;
 
@@ -279,8 +285,8 @@ bot.on("message", async (msg) => {
       case "WAITING_STATUS":
         if (
           text === "Новый кандидат" ||
-          text === "Бывший сотрудник (уволился меньше месяца)" ||
-          text === "Бывший сотрудник (уволился больше месяца)"
+          text === "Бывший сотрудник (уволился < месяц)" ||
+          text === "Бывший сотрудник (уволился > месяц)"
         ) {
           state.data.status = text;
           await bot.sendMessage(chatId, "В какой трудовой форме удобно сотрудничать с компанией Самокат?", employmentKeyboard);
@@ -318,6 +324,7 @@ bot.on("message", async (msg) => {
 Имя: ${state.data.name || "Не указано"}
 Возраст: ${state.data.age || "Не указан"}
 Гражданство: ${state.data.citizenship || "Не указано"}
+Город: ${state.data.city || "Не указан"}
 Умение кататься на велосипеде: ${state.data.bike || "Не указано"}
 Статус: ${state.data.status || "Не указан"}
 Форма сотрудничества: ${state.data.employment || "Не указана"}
