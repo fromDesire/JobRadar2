@@ -20,6 +20,30 @@ const mainMenu = {
   },
 };
 
+// Клавиатуры для выбора статуса и формы сотрудничества
+const statusKeyboard = {
+  reply_markup: {
+    keyboard: [
+      [{ text: "Новый кандидат" }],
+      [{ text: "Бывший сотрудник (уволился < месяц)" }],
+      [{ text: "Бывший сотрудник (уволился > месяц)" }],
+    ],
+    resize_keyboard: true,
+    one_time_keyboard: true,
+  },
+};
+
+const employmentKeyboard = {
+  reply_markup: {
+    keyboard: [
+      [{ text: "Самозанятость" }],
+      [{ text: "ГПХ" }],
+    ],
+    resize_keyboard: true,
+    one_time_keyboard: true,
+  },
+};
+
 // Функция для получения упоминания пользователя
 function getUserMention(msg) {
   return msg.from.username ? `@${msg.from.username}` : `id${msg.from.id}`;
@@ -252,27 +276,39 @@ bot.on("message", (msg) => {
           "1️⃣ Новый кандидат\n" +
           "2️⃣ Бывший сотрудник (уволился меньше месяца назад)\n" +
           "3️⃣ Бывший сотрудник (уволился более месяца назад)",
-        mainMenu
+        statusKeyboard
       );
       state.step = "WAITING_STATUS";
       break;
 
     case "WAITING_STATUS":
-      state.data.status = text;
-      bot.sendMessage(
-        chatId,
-        "В какой трудовой форме удобно сотрудничать с компанией Самокат?\n" +
-          "1️⃣ Самозанятость\n" +
-          "2️⃣ ГПХ",
-        mainMenu
-      );
-      state.step = "WAITING_EMPLOYMENT";
+      if (
+        text === "Новый кандидат" ||
+        text === "Бывший сотрудник (уволился < месяц)" ||
+        text === "Бывший сотрудник (уволился > месяц)"
+      ) {
+        state.data.status = text;
+        bot.sendMessage(
+          chatId,
+          "В какой трудовой форме удобно сотрудничать с компанией Самокат?\n" +
+            "1️⃣ Самозанятость\n" +
+            "2️⃣ ГПХ",
+          employmentKeyboard
+        );
+        state.step = "WAITING_EMPLOYMENT";
+      } else {
+        bot.sendMessage(chatId, "Пожалуйста, выберите один из предложенных вариантов.", statusKeyboard);
+      }
       break;
 
     case "WAITING_EMPLOYMENT":
-      state.data.employment = text;
-      bot.sendMessage(chatId, "Оставьте ваш номер телефона.", mainMenu);
-      state.step = "WAITING_PHONE";
+      if (text === "Самозанятость" || text === "ГПХ") {
+        state.data.employment = text;
+        bot.sendMessage(chatId, "Оставьте ваш номер телефона.", mainMenu);
+        state.step = "WAITING_PHONE";
+      } else {
+        bot.sendMessage(chatId, "Пожалуйста, выберите один из предложенных вариантов.", employmentKeyboard);
+      }
       break;
 
     case "WAITING_PHONE":
